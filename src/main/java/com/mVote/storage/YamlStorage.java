@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 
 public class YamlStorage implements IStorage {
     private final Main plugin;
-    private File oyFile;
-    private FileConfiguration oyConfig;
+    private File voteFile;
+    private FileConfiguration voteConfig;
 
     private final Set<UUID> dailyVoters = new HashSet<>();
     private final Set<String> pendingVotesByName = new HashSet<>();
@@ -23,16 +23,30 @@ public class YamlStorage implements IStorage {
 
     @Override
     public void setup() {
-        // dataFolder ve vote.yml yükleme
         plugin.getDataFolder().mkdirs();
-        oyFile = new File(plugin.getDataFolder(), "vote.yml");
-        if (!oyFile.exists()) {
-            plugin.saveResource("vote.yml", false);
+
+        // 1. Dosya adını SENİN İSTEDİĞİN GİBİ vote.yml yaptık
+        voteFile = new File(plugin.getDataFolder(), "vote.yml");
+
+        if (!voteFile.exists()) {
+            try {
+                // Önce JAR içinden kopyalamayı dene
+                plugin.saveResource("vote.yml", false);
+            } catch (Exception e) {
+                // Eğer JAR içinde yoksa (Unuttuysan), BOŞ BİR TANE OLUŞTUR (Hata vermez artık)
+                try {
+                    voteFile.createNewFile();
+                } catch (IOException ex) {
+                    plugin.getLogger().severe("vote.yml oluşturulamadı!");
+                    ex.printStackTrace();
+                }
+            }
         }
-        oyConfig = YamlConfiguration.loadConfiguration(oyFile);
+
+        voteConfig = YamlConfiguration.loadConfiguration(voteFile);
 
         loadVotersFromConfig();
-        plugin.getLogger().info("YAML depolama yuklendi. Kayitli oy: " + (dailyVoters.size() + pendingVotesByName.size()));
+        plugin.getLogger().info("YAML (vote.yml) yüklendi. Kayıtlı oy: " + (dailyVoters.size() + pendingVotesByName.size()));
     }
 
     @Override
@@ -48,19 +62,20 @@ public class YamlStorage implements IStorage {
     }
 
     @Override
-    public void removeVoteByName(String username) { // 👈 EKSİK OLAN VE EKLENEN METOT
+    public void removeVoteByName(String username) {
         if (pendingVotesByName.remove(username.toLowerCase())) {
             saveVotersToConfig();
-            plugin.getLogger().info("Bekleyen oy kaydi silindi (Isim): " + username);
         }
     }
 
-
     @Override
     public void reload() {
-        oyConfig = YamlConfiguration.loadConfiguration(oyFile);
+        if (!voteFile.exists()) {
+            setup();
+        }
+        voteConfig = YamlConfiguration.loadConfiguration(voteFile);
         loadVotersFromConfig();
-        plugin.getLogger().info("vote.yml yeniden yüklendi ve cache güncellendi.");
+        plugin.getLogger().info("vote.yml yeniden yüklendi.");
     }
 
     @Override
@@ -84,14 +99,14 @@ public class YamlStorage implements IStorage {
         dailyVoters.clear();
         pendingVotesByName.clear();
 
-        List<String> uuidList = oyConfig.getStringList("daily-voters");
+        List<String> uuidList = voteConfig.getStringList("daily-voters");
         for (String s : uuidList) {
             try {
                 dailyVoters.add(UUID.fromString(s));
             } catch (IllegalArgumentException ignored) {}
         }
 
-        List<String> nameList = oyConfig.getStringList("pending-votes-by-name");
+        List<String> nameList = voteConfig.getStringList("pending-votes-by-name");
         pendingVotesByName.addAll(nameList.stream()
                 .map(String::toLowerCase)
                 .collect(Collectors.toSet()));
@@ -101,14 +116,14 @@ public class YamlStorage implements IStorage {
         List<String> uuidList = dailyVoters.stream()
                 .map(UUID::toString)
                 .collect(Collectors.toList());
-        oyConfig.set("daily-voters", uuidList);
+        voteConfig.set("daily-voters", uuidList);
 
-        oyConfig.set("pending-votes-by-name", new ArrayList<>(pendingVotesByName));
+        voteConfig.set("pending-votes-by-name", new ArrayList<>(pendingVotesByName));
 
         try {
-            oyConfig.save(oyFile);
+            voteConfig.save(voteFile);
         } catch (IOException e) {
-            plugin.getLogger().severe("vote.yml kaydedilemedi!");
+            plugin.getLogger().severe("vote.yml dosyasına yazılamadı!");
             e.printStackTrace();
         }
     }
