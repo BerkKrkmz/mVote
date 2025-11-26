@@ -1,0 +1,31 @@
+# TR: Depolama Tipi: "YAML" veya "SQLITE"
+# EN: Storage Type: "YAML" or "SQLITE"
+storage-type: "YAML"
+
+# TR: Günlük sıfırlama saati (0-23 arası tam saatler). Örn: 7 = Sabah 07:00
+# Minecraft-MP sitesi türkiye saatiyle her sabah 7 de sıfırlanır o yüzden 7'de bırakın!!!
+
+# EN: Daily reset time (full hours between 0 and 23). E.g.: 7 = 7:00 AM
+# The Minecraft-MP site resets every morning at 7 AM Turkey time, so leave it at 7!!!
+reset-time: 7
+
+permissions:
+  op-bypass: true           # OP olan oyuncular kısıtlamaları bypass etsin mi? (EN: Should OP players bypass the restrictions?)
+  bypass-permission: "mvote.bypass" # Tüm kısıtlamaları bypass edecek ana izin (EN: The master permission that bypasses all restrictions)
+  admin-permission: "mvote.admin"   # /mvote komutunu kullanma izni (EN: Permission to use the /mvote command)
+
+restrictions:
+  chat: true           # Oy vermeyen sohbete yazamasın mı? (
+  trade: true          # Oy vermeyen takas yapamasın mı? (Shopkeepers)
+  crates: true         # Oy vermeyen kasa açamasın mı?
+  crate-blocks:        # Kasa olarak sayılacak bloklar (Kasa pluginine göre değişir)
+    - "CHEST"
+    - "ENDER_CHEST"
+    - "TRAPPED_CHEST"
+
+messages:
+  no-vote-chat: "&c&lHATA! &7Sohbete yazmak için önce oy vermelisin: &e/oy"
+  no-vote-trade: "&c&lHATA! &7Takas yapmak için oy vermelisin!"
+  no-vote-crate: "&c&lHATA! &7Kasa açmak için oy vermelisin!"
+  vote-received: "&a&lTEBRİKLER! &7Oyun başarıyla kaydedildi."
+  reminder: "&e&lBİLGİ &7Günlük oyun sıfırlandı! Tekrar oy vererek ödül kazanabilirsin."

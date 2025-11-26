@@ -1,0 +1,6 @@
+# MelezVoteManager Oy Veri Dosyasi
+# Bu dosyaya elle dokunmayiniz.
+daily-voters:
+  - # Burada oy verenlerin UUID'leri listelenecek
+pending-votes-by-name:
+  - # Burada sunucuya girmemis oy verenlerin isimleri listelenecek
